@@ -1,0 +1,45 @@
+{
+  "name": "license-delivery-demo",
+  "version": "1.0.0",
+  "description": "Demo: Resilient License Delivery System with Idempotent Webhooks and Background Jobs",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "test:webhook": "ts-node scripts/send-webhook.ts",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "keywords": [
+    "webhook",
+    "idempotency",
+    "bullmq",
+    "prisma",
+    "clean-architecture"
+  ],
+  "author": "Muhammad Mujtaba Rehman",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^6.2.0",
+    "axios": "^1.13.2",
+    "bullmq": "^5.36.3",
+    "dotenv": "^16.4.7",
+    "express": "^5.2.1",
+    "ioredis": "^5.4.2",
+    "prisma": "^6.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.5",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1",
+    "prettier": "^3.4.2",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.2"
+  }
+}

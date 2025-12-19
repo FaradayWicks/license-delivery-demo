@@ -1,0 +1,76 @@
+// Prisma Schema for License Delivery Demo
+// Demonstrates idempotent webhook processing with unique constraints
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Webhook events from external providers (Stripe, etc.)
+// The unique constraint on externalId enforces idempotency
+model WebhookEvent {
+  id          String   @id @default(uuid())
+  externalId  String   @unique // Critical: prevents duplicate processing
+  provider    Provider
+  eventType   String   // e.g., "checkout.session.completed"
+  payload     Json     // Raw webhook payload
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+  
+  orders      Order[]
+
+  @@index([provider, eventType])
+  @@map("webhook_events")
+}
+
+enum Provider {
+  STRIPE
+  MOCK
+}
+
+// Orders created from successful webhook events
+model Order {
+  id              String      @id @default(uuid())
+  externalOrderId String      // From Stripe session ID
+  productId       String      // Product identifier
+  customerEmail   String
+  status          OrderStatus @default(PENDING)
+  webhookEventId  String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  webhookEvent    WebhookEvent @relation(fields: [webhookEventId], references: [id])
+  licenseKeys     LicenseKey[]
+
+  @@index([status])
+  @@index([customerEmail])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  FULFILLED
+  FAILED
+}
+
+// License keys delivered to customers
+model LicenseKey {
+  id          String    @id @default(uuid())
+  orderId     String
+  productId   String
+  licenseKey  String    // In production: encrypt this field
+  providerId  String    // External provider's key ID
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  
+  order       Order     @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@map("license_keys")
+}
+
